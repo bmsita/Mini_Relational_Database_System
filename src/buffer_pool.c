@@ -16,12 +16,40 @@ void bufferpool_init(BufferPool *pool, int capacity) {
         exit(1);
     }
     for (int i = 0; i < capacity; ++i) {
-        pool->frames[i].page_id = UINT32_MAX; // unused
+        pool->frames[i].page_id = UINT32_MAX;
         pool->frames[i].dirty = false;
         pool->frames[i].pin_count = 0;
         memset(pool->frames[i].data, 0, PAGE_SIZE);
     }
     printf("[BufferPool] Initialized with %d frames.\n", capacity);
+}
+
+//find index by page_id
+static int find_index(BufferPool *pool, uint32_t page_id) {
+    for (int i = 0; i < pool->capacity; ++i) {
+        if (pool->frames[i].page_id == page_id) return i;
+    }
+    return -1;
+}
+
+// find a free or evictable index
+static int find_free_or_evict(BufferPool *pool) {
+    for (int i = 0; i < pool->capacity; ++i) {
+        if (pool->frames[i].page_id == UINT32_MAX) return i;
+    }
+    for (int i = 0; i < pool->capacity; ++i) {
+        if (pool->frames[i].pin_count == 0) return i;
+    }
+    return -1;
+}
+
+//Simulated disk read
+static void simulated_disk_read(uint32_t page_id, char *buf) {
+    snprintf(buf, PAGE_SIZE, "PAGE_%u: simulated content", page_id);
+}
+//Simulated disk write
+static void simulated_disk_write(uint32_t page_id, char *buf) {
+    printf("[DISK WRITE] page %u -> %.40s\n", page_id, buf);
 }
 
 PageFrame *bufferpool_get_page(BufferPool *pool, uint32_t page_id) {
@@ -46,6 +74,13 @@ PageFrame *bufferpool_get_page(BufferPool *pool, uint32_t page_id) {
             simulated_disk_write(pool->frames[slot].page_id, pool->frames[slot].data);
         }
     }
+    // load the new page into slot
+    simulated_disk_read(page_id, pool->frames[slot].data);
+    pool->frames[slot].page_id = page_id;
+    pool->frames[slot].dirty = false;
+    pool->frames[slot].pin_count = 1;
+    printf("[MISS] Loaded page %u into frame %d (pin_count=1)\n", page_id, slot);
+    return &pool->frames[slot];
 }
 
 //unpin pages
@@ -58,6 +93,22 @@ void bufferpool_unpin_page(BufferPool *pool, uint32_t page_id) {
     }
     if (pool->frames[idx].pin_count > 0) pool->frames[idx].pin_count--;
     printf("[UNPIN] Page %u (pin_count=%d)\n", page_id, pool->frames[idx].pin_count);
+}
+
+//Flush a specific page to disk if dirty
+void bufferpool_flush_page(BufferPool *pool, uint32_t page_id) {
+    if (!pool) return;
+    int idx = find_index(pool, page_id);
+    if (idx == -1) {
+        printf("[WARN] flush: page %u not found\n", page_id);
+        return;
+    }
+    if (pool->frames[idx].dirty) {
+        simulated_disk_write(page_id, pool->frames[idx].data);
+        pool->frames[idx].dirty = false;
+    } else {
+        printf("[INFO] flush: page %u not dirty\n", page_id);
+    }
 }
 
 //Cleanup
