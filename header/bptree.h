@@ -1,0 +1,28 @@
+#ifndef BPTREE_H
+#define BPTREE_H
+
+#include <stdbool.h>
+#include "record.h"
+
+#define BP_ORDER 3  
+
+typedef struct BPTreeNode {
+    bool is_leaf;
+    int num_keys;
+    int keys[BP_ORDER];
+    void *children[BP_ORDER + 1];
+    struct BPTreeNode *next; // link leaf nodes for traversal
+} BPTreeNode;
+
+typedef struct {
+    BPTreeNode *root;
+    int order;
+} BPTree;
+
+void bptree_init(BPTree *tree);
+void bptree_insert(BPTree *tree, int key, Record *rec);
+Record *bptree_search(BPTree *tree, int key);
+void bptree_traverse(BPTree *tree); // range traversal (in order)
+void bptree_print(BPTree *tree);
+
+#endif
