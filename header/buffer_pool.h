@@ -22,5 +22,7 @@ typedef struct {
 
 /* API */
 void bufferpool_init(BufferPool *pool, int capacity);
+void bufferpool_unpin_page(BufferPool *pool, uint32_t page_id);
+void bufferpool_cleanup(BufferPool *pool);
 
 #endif 
