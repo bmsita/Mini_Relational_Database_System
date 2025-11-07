@@ -71,6 +71,11 @@ void sql_execute(const char *query, BPTree *index) {
         printf("  HELP;                        -> Show help message\n");
         printf("  EXIT;                        -> Quit program\n\n");
     }
+    else if (strncasecmp(cmd, "SELECT * FROM students", 22) == 0) {
+        printf("\nID | Name     | Marks\n");
+        printf("-----------------------\n");
+        bptree_traverse(index);
+    }
     else if (strncasecmp(cmd, "EXIT", 4) == 0) {
         printf("Exiting MiniDB...\n");
         exit(0);

@@ -4,14 +4,14 @@
 #include <stdbool.h>
 #include "record.h"
 
-#define BP_ORDER 3  
+#define BP_ORDER 3
 
 typedef struct BPTreeNode {
     bool is_leaf;
     int num_keys;
     int keys[BP_ORDER];
     void *children[BP_ORDER + 1];
-    struct BPTreeNode *next; // link leaf nodes for traversal
+    struct BPTreeNode *next;
 } BPTreeNode;
 
 typedef struct {

@@ -33,7 +33,6 @@ static void bptree_insert_into_leaf(BPTreeNode *leaf, int key, Record *rec) {
     leaf->num_keys++;
 }
 
-
 static BPTreeNode *bptree_split_leaf(BPTreeNode *leaf) {
     int split = leaf->num_keys / 2;
     BPTreeNode *new_leaf = bptree_create_node(true);
@@ -104,20 +103,23 @@ Record *bptree_search(BPTree *tree, int key) {
 }
 
 void bptree_traverse(BPTree *tree) {
-    if (!tree->root) return;
-    BPTreeNode *node = tree->root;
-    while (!node->is_leaf)
-        node = (BPTreeNode*)node->children[0];
-
-    printf("[B+Tree Traversal] Keys in order: ");
-    while (node) {
-        for (int i = 0; i < node->num_keys; i++)
-            printf("%d ", node->keys[i]);
-        node = node->next;
+    BPTreeNode *cur = tree->root;
+    if (!cur) {
+        printf("(no records)\n");
+        return;
     }
-    printf("\n");
-}
 
+    while (!cur->is_leaf)
+        cur = cur->children[0];
+
+    while (cur) {
+        for (int i = 0; i < cur->num_keys; i++) {
+            Record *r = (Record *)cur->children[i];
+            printf("%d | %-10s | %d\n", r->id, r->name, r->marks);
+        }
+        cur = cur->next;
+    }
+}
 void bptree_print(BPTree *tree) {
     printf("[B+Tree] Print (root has %d keys)\n", tree->root->num_keys);
     bptree_traverse(tree);

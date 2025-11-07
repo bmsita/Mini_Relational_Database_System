@@ -11,7 +11,7 @@ int arc_evict_page(void);
 
 void arc_print_state(void);
 
-void arc_get_stats(void);
+void arc_get_stats(int *hits, int *misses, int *evictions);
 
 void arc_cleanup(void);
 
