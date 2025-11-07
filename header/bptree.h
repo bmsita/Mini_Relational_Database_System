@@ -22,7 +22,8 @@ typedef struct {
 void bptree_init(BPTree *tree);
 void bptree_insert(BPTree *tree, int key, Record *rec);
 Record *bptree_search(BPTree *tree, int key);
-void bptree_traverse(BPTree *tree); // range traversal (in order)
+void bptree_traverse(BPTree *tree); 
 void bptree_print(BPTree *tree);
+void bptree_free(BPTreeNode *node);
 
 #endif

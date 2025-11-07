@@ -11,7 +11,7 @@ int main() {
     BPTree index;
     bptree_init(&index);
 
-    printf("\n🧩 MiniDB SQL Engine Ready!\n");
+    printf("\nMiniDB SQL Engine Ready!\n");
     printf("Type SQL queries like:\n");
     printf("  SELECT 7 + 5;\n");
     printf("  INSERT INTO students VALUES (1, 'Rojalin', 95);\n");

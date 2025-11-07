@@ -10,7 +10,12 @@ int main() {
     BPTree index;
     bptree_init(&index);
 
-    printf("MiniDB SQL Engine Ready! Type SQL queries (e.g., SELECT 7+5;)\n");
+    printf("MiniDB SQL Engine Ready\n");
+    printf("Type SQL queries like:\n");
+    printf("  SELECT 7 + 5;\n");
+    printf("  INSERT INTO students VALUES (1, 'Rojalin', 95);\n");
+    printf("  SELECT * FROM students;\n");
+    printf("Type EXIT; to quit.\n\n");
 
     char query[256];
     while (1) {
@@ -19,8 +24,9 @@ int main() {
         if (strncmp(query, "EXIT", 4) == 0) break;  
         sql_execute(query, &index);
     }
-
+    bptree_free(index.root);
     bufferpool_cleanup(&pool);
     wal_close(&g_wal);
+    
     return 0;
 }

@@ -124,3 +124,16 @@ void bptree_print(BPTree *tree) {
     printf("[B+Tree] Print (root has %d keys)\n", tree->root->num_keys);
     bptree_traverse(tree);
 }
+void bptree_free(BPTreeNode *node){
+    if (!node) return;
+    if (node->is_leaf) {
+        for (int i = 0; i < node->num_keys; i++) {
+            free(node->children[i]);
+        }
+    } else {
+        for (int i = 0; i <= node->num_keys; i++) {
+            bptree_free(node->children[i]);
+        }
+    }
+    free(node);
+}

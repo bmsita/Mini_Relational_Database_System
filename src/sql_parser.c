@@ -32,9 +32,23 @@ void sql_execute(const char *query, BPTree *index) {
 
     if (strlen(cmd) == 0) return;
 
-    if (strncasecmp(cmd, "SELECT", 6) == 0) {
+    //removed semicolon
+    char *semi = strchr(cmd, ';');
+    if (semi) *semi = '\0';
+    trim(cmd);
+
+    //First check SELECT case
+    if (strncasecmp(cmd, "SELECT * FROM students;", 22) == 0) {
+        printf("\nID | Name     | Marks\n");
+        printf("-----------------------\n");
+        bptree_traverse(index);
+    }
+
+    else if (strncasecmp(cmd, "SELECT", 6) == 0) {
         const char *expr = cmd + 6;
-        while (isspace(*expr)) expr++;
+        while (isspace(*expr)){
+        expr++;
+        }
 
         char expr_copy[128];
         strncpy(expr_copy, expr, sizeof(expr_copy) - 1);
@@ -51,14 +65,16 @@ void sql_execute(const char *query, BPTree *index) {
         int id, marks;
         char name[50];
 
-        if (sscanf(cmd, "INSERT INTO students VALUES (%d, '%49[^']', %d);", &id, name, &marks) == 3) {
-            Record rec;
-            rec.id = id;
-            strcpy(rec.name, name);
-            rec.marks = marks;
+        if (sscanf(cmd, "INSERT INTO students VALUES (%d, '%49[^']', %d);", &id, name, &marks) == 3 ||
+        sscanf(cmd, "INSERT INTO students VALUES ( %d , \"%49[^\"]\" , %d );", &id, name, &marks) == 3 ||
+        sscanf(cmd, "INSERT INTO students VALUES (%d, '%49[^']', %d);", &id, name, &marks) == 3) {
+            Record *rec = (Record *)malloc(sizeof(Record));
+            rec->id = id;
+            strcpy(rec->name, name);
+            rec->marks = marks;
 
-            bptree_insert(index, rec.id, &rec);
-            printf("Record inserted: ID=%d, Name=%s, Marks=%d\n", rec.id, rec.name, rec.marks);
+            bptree_insert(index, rec->id, rec);
+            printf("Record inserted: ID=%d, Name=%s, Marks=%d\n", rec->id, rec->name, rec->marks);
         } else {
             printf("Invalid INSERT syntax.\n");
             printf("Example: INSERT INTO students VALUES (1, 'Alice', 95);\n");
@@ -67,15 +83,13 @@ void sql_execute(const char *query, BPTree *index) {
     else if (strncasecmp(cmd, "HELP", 4) == 0) {
         printf("\nAvailable Commands:\n");
         printf("  SELECT <expr>;               -> Evaluate arithmetic\n");
+        printf("  SELECT * FROM students;      -> Display all student records\n");
         printf("  INSERT INTO students VALUES (id, 'name', marks);\n");
         printf("  HELP;                        -> Show help message\n");
         printf("  EXIT;                        -> Quit program\n\n");
     }
-    else if (strncasecmp(cmd, "SELECT * FROM students", 22) == 0) {
-        printf("\nID | Name     | Marks\n");
-        printf("-----------------------\n");
-        bptree_traverse(index);
-    }
+
+    //EXIT
     else if (strncasecmp(cmd, "EXIT", 4) == 0) {
         printf("Exiting MiniDB...\n");
         exit(0);
