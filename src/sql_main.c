@@ -1,7 +1,11 @@
 #include "sql_parser.h"
-#include <string.h>   
+#include "storage.h" 
+#include <string.h> 
+#include <stdio.h>
+#include <stdlib.h>  
 
 int main() {
+    printf("MiniDB Starting......\n");
     BufferPool pool;
     bufferpool_init(&pool, 3);
     wal_init(&g_wal, "wal.log");
@@ -9,6 +13,7 @@ int main() {
 
     BPTree index;
     bptree_init(&index);
+    load_records_from_file(&index, "students.db");
 
     printf("MiniDB SQL Engine Ready\n");
     printf("Type SQL queries like:\n");
@@ -21,12 +26,15 @@ int main() {
     while (1) {
         printf("SQL> ");
         if (!fgets(query, sizeof(query), stdin)) break;
-        if (strncmp(query, "EXIT", 4) == 0) break;  
+        if (strncasecmp(query, "EXIT", 4) == 0) break;
         sql_execute(query, &index);
     }
+    save_records_to_file(&index, "students.db");
+
     bptree_free(index.root);
     bufferpool_cleanup(&pool);
     wal_close(&g_wal);
+    printf("MiniDB Shutdown complete. Data saved successfully.\n");
     
     return 0;
 }
