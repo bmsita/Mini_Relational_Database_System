@@ -1,3 +1,4 @@
+//header/bptree.h
 #ifndef BPTREE_H
 #define BPTREE_H
 
@@ -25,5 +26,6 @@ Record *bptree_search(BPTree *tree, int key);
 void bptree_traverse(BPTree *tree); 
 void bptree_print(BPTree *tree);
 void bptree_free(BPTreeNode *node);
+void bptree_for_each(BPTree *tree, void (*fn)(Record *r, void *ctx), void *ctx);
 
 #endif

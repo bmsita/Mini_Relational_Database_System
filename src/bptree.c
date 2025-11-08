@@ -1,3 +1,4 @@
+//src/bptree.c
 #include "bptree.h"
 #include "record.h"
 #include <stdio.h>
@@ -124,15 +125,33 @@ void bptree_print(BPTree *tree) {
     printf("[B+Tree] Print (root has %d keys)\n", tree->root->num_keys);
     bptree_traverse(tree);
 }
+
+void bptree_for_each(BPTree *tree, void (*fn)(Record *r, void *ctx), void *ctx) {
+    if (!tree || !tree->root || !fn) return;
+    BPTreeNode *cur = tree->root;
+    while (!cur->is_leaf) {
+        cur = (BPTreeNode*)cur->children[0];
+        if (!cur) return;
+    }
+    while (cur) {
+        for (int i = 0; i < cur->num_keys; ++i) {
+            Record *r = (Record*)cur->children[i];
+            if (r) fn(r, ctx);
+        }
+        cur = cur->next;
+    }
+}
+
 void bptree_free(BPTreeNode *node){
     if (!node) return;
     if (node->is_leaf) {
-        for (int i = 0; i < node->num_keys; i++) {
-            free(node->children[i]);
+        for (int i = 0; i < node->num_keys; ++i) {
+            Record *r = (Record*)node->children[i];
+            if (r) free(r);
         }
     } else {
         for (int i = 0; i <= node->num_keys; i++) {
-            bptree_free(node->children[i]);
+            bptree_free((BPTreeNode*)node->children[i]);
         }
     }
     free(node);
