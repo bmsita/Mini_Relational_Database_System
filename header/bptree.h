@@ -22,6 +22,7 @@ typedef struct {
 
 void bptree_init(BPTree *tree);
 void bptree_insert(BPTree *tree, int key, Record *rec);
+void bptree_delete(BPTree *tree, int key);
 Record *bptree_search(BPTree *tree, int key);
 void bptree_traverse(BPTree *tree); 
 void bptree_print(BPTree *tree);

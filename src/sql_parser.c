@@ -128,30 +128,44 @@ void sql_execute(const char *query, BPTree *index) {
         printf("Result: %d\n", result);
         return;
     }
+    
     else if (strncasecmp(cmd, "INSERT", 6) == 0) {
-        int id, marks;
-        char name[50];
-        if (sscanf(cmd, "INSERT INTO students VALUES (%d, '%49[^']', %d)", &id, name, &marks) == 3 ||
-            sscanf(cmd, "INSERT INTO students VALUES (%d, \"%49[^\"]\", %d)", &id, name, &marks) == 3) {
-            // allocate record on heap
-            Record *rec = malloc(sizeof(Record));
-            rec->id = id;
-            strncpy(rec->name, name, sizeof(rec->name)-1);
-            rec->name[sizeof(rec->name)-1] = '\0';
-            rec->marks = marks;
-            bptree_insert(index, rec->id, rec);
-            printf("Record inserted: ID=%d, Name=%s, Marks=%d\n", rec->id, rec->name, rec->marks);
-        } else {
-            printf("Invalid INSERT syntax.\nExample: INSERT INTO students VALUES (1, 'Alice', 95)\n");
-        }
-        return;
+    int id, marks;
+    char name[50];
+    if (sscanf(cmd, "INSERT INTO students VALUES (%d, '%49[^']', %d)", &id, name, &marks) == 3 ||
+        sscanf(cmd, "INSERT INTO students VALUES (%d, \"%49[^\"]\", %d)", &id, name, &marks) == 3) {
+        Record *rec = malloc(sizeof(Record));
+        rec->id = id;
+        strncpy(rec->name, name, sizeof(rec->name)-1);
+        rec->name[sizeof(rec->name)-1] = '\0';
+        rec->marks = marks;
+        bptree_insert(index, rec->id, rec);
+        printf("Record inserted: ID=%d, Name=%s, Marks=%d\n", rec->id, rec->name, rec->marks);
+    } else {
+        printf("Invalid INSERT syntax.\nExample: INSERT INTO students VALUES (1, 'Alice', 95)\n");
     }
+    return;
+}
+
+else if (strncasecmp(cmd, "DELETE FROM students WHERE ID =", 31) == 0) {
+    int id;
+    if (sscanf(cmd, "DELETE FROM students WHERE ID = %d", &id) == 1) {
+        bptree_delete(index, id);
+        printf("Deleted record(s) with ID=%d\n", id);
+    } else {
+        printf("Invalid DELETE syntax.\nExample: DELETE FROM students WHERE ID = 5;\n");
+    }
+    return;
+}
+
+
 else if (strncasecmp(cmd, "HELP", 4) == 0) {
         printf("\nAvailable Commands:\n");
         printf("  SELECT <expr>;               -> Evaluate arithmetic\n");
         printf("  SELECT * FROM students;      -> Display all student records\n");
         printf("  SELECT name FROM students;   -> Display name column\n");
         printf("  INSERT INTO students VALUES (id, 'name', marks)\n");
+        printf("  DELETE FROM students WHERE ID = n; -> Delete record(s) by ID\n");
         printf("  HELP;                        -> Show help message\n");
         printf("  EXIT;                        -> Quit program\n\n");
         return;

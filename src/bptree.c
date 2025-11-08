@@ -103,6 +103,34 @@ Record *bptree_search(BPTree *tree, int key) {
     return NULL;
 }
 
+void bptree_delete(BPTree *tree, int key) {
+    BPTreeNode *node = tree->root;
+    while (node && !node->is_leaf) {
+        int i = 0;
+        while (i < node->num_keys && key >= node->keys[i]) i++;
+        node = (BPTreeNode *)node->children[i];
+    }
+
+    if (!node) return;
+
+    for (int i = 0; i < node->num_keys; i++) {
+        if (node->keys[i] == key) {
+            Record *r = (Record *)node->children[i];
+            if (r) free(r);
+            for (int j = i; j < node->num_keys - 1; j++) {
+                node->keys[j] = node->keys[j + 1];
+                node->children[j] = node->children[j + 1];
+            }
+            node->num_keys--;
+            printf("[B+Tree] Deleted key=%d\n", key);
+            return;
+        }
+    }
+
+    printf("[B+Tree] Key=%d not found for delete.\n", key);
+}
+
+
 void bptree_traverse(BPTree *tree) {
     BPTreeNode *cur = tree->root;
     if (!cur) {
@@ -122,7 +150,7 @@ void bptree_traverse(BPTree *tree) {
     }
 }
 void bptree_print(BPTree *tree) {
-    printf("[B+Tree] Print (root has %d keys)\n", tree->root->num_keys);
+    printf("[B+Tree] Print (root has %d keys)\n", tree->root ? tree->root->num_keys : 0);
     bptree_traverse(tree);
 }
 
